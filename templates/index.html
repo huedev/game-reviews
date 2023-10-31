@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS50 Game Reviews</title>
+</head>
+<body>
+    <h1>CS50 Game Reviews</h1>
+    <ul>
+        {% for game in games %}
+            <li>
+                {% for key, value in game.items() %}
+                    {% if key == "cover" %}
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_small/{{ value.image_id }}.jpg">
+                    {% endif %}
+                {% endfor %}
+                {{ game.name }}
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
