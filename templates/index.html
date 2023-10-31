@@ -10,11 +10,11 @@
     <ul>
         {% for game in games %}
             <li>
-                {% for key, value in game.items() %}
-                    {% if key == "cover" %}
-                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_small/{{ value.image_id }}.jpg">
-                    {% endif %}
-                {% endfor %}
+                {% if 'cover' in game %}
+                    <img src="https://images.igdb.com/igdb/image/upload/t_cover_small/{{ game['cover']['image_id'] }}.jpg">
+                {% else %}
+                    <img src="https://images.igdb.com/igdb/image/upload/t_cover_small/nocover.jpg">
+                {% endif %}
                 {{ game.name }}
             </li>
         {% endfor %}

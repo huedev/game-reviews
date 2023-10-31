@@ -21,7 +21,7 @@ def igdb_authenticate(client_id, client_secret):
 
 
 def igdb_query(client_id, access_token, endpoint, query):
-    "Send query to IGDB and retrieve result"
+    """Send query to IGDB and retrieve result"""
     try:
         response = post(f'https://api.igdb.com/v4/{endpoint}', **{'headers': {'Client-ID': client_id, 'Authorization': f'Bearer {access_token}'},'data': query})
         return response.json()
