@@ -3,21 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{url_for('static',filename='css/output.css')}}" rel="stylesheet">
     <title>CS50 Game Reviews</title>
 </head>
-<body>
-    <h1>CS50 Game Reviews</h1>
-    <ul>
-        {% for game in games %}
-            <li>
-                {% if 'cover' in game %}
-                    <img src="https://images.igdb.com/igdb/image/upload/t_cover_small/{{ game['cover']['image_id'] }}.jpg">
-                {% else %}
-                    <img src="https://images.igdb.com/igdb/image/upload/t_cover_small/nocover.jpg">
-                {% endif %}
-                {{ game.name }}
+<body class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <header>
+        <nav class="py-3">
+            <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">CS50 Game Reviews</h1>
+        </nav>
+    </header>
+    <main>
+        <ul role="list" class="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-6 xl:gap-x-4">
+            {% for game in games %}
+            <li class="relative">
+                <a href="/" class="group flex justify-center items-center w-full overflow-hidden rounded-md bg-gray-100 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100">
+                    {% if 'cover' in game %}
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/{{ game['cover']['image_id'] }}.jpg" alt="" class="transition ease-in-out object-cover group-hover:brightness-25 duration-300">
+                    {% else %}
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/nocover.jpg" alt="" class="object-cover group-hover:brightness-25">
+                    {% endif %}
+                    <p class="transition ease-in-out absolute text-center justify-center items-center top-0 bottom-0 z-10 w-11/12 pointer-events-none mt-2 flex text-sm font-semibold text-white opacity-0 group-hover:opacity-100 duration-300">{{ game.name }}</p>
+                </a>
             </li>
-        {% endfor %}
-    </ul>
+            {% endfor %}
+        </ul>
+    </main>
+    <footer class="py-3">
+        <div class="text-sm text-gray-500">
+            Powered by <a href="https://www.igdb.com/" class="text-gray-900">IGDB</a>
+        </div>
+    </footer>
 </body>
 </html>

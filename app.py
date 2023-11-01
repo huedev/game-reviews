@@ -9,5 +9,5 @@ ACCESS_TOKEN = igdb_authenticate(CLIENT_ID, CLIENT_SECRET)
 
 @app.route('/')
 def index():
-    games = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', 'fields name, cover.image_id; where rating > 90;')
+    games = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', 'fields name, cover.image_id; where rating > 90; limit 6;')
     return render_template('index.html', games=games)
