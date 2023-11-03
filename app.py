@@ -27,7 +27,63 @@ def index():
     return render_template('index.html', games=games)
 
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route('/search/', methods=["GET", "POST"])
+@login_required
+def search_redirect():
+    """Redirect to search results"""
+    if request.method == "POST":
+        print("Go to search!")
+        search = request.form.get("search")
+        return redirect(f"/search/{search}")
+    else:
+        print("Go to home!")
+        return redirect("/")
+
+
+@app.route('/search/<search>', methods=["GET", "POST"])
+@login_required
+def search(search):
+    """Display search results"""
+    games = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'search "{search}"; fields name, cover.image_id; where category = 0; limit 18;')
+    return render_template('search.html', search=search, games=games)
+
+
+@app.route('/game/<game_id>', methods=["GET", "POST"])
+@login_required
+def game_details(game_id):
+    """Game details page"""
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        # Ensure game_id was submitted
+        if not request.form.get("game_id"):
+            return False
+        
+        # Ensure review was submitted
+        elif not request.form.get("review"):
+            return False
+        
+        # Submit review
+        db.execute(
+            "INSERT INTO reviews (user_id, game_id, rating, review) values(?, ?, ?, ?)",
+            session["user_id"],
+            request.form.get("game_id"),
+            request.form.get("rating"),
+            request.form.get("review"),
+        )
+
+    game = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'fields *, cover.image_id, platforms.name, genres.name; where id = {game_id}; limit 1;')[0]
+    aggregate_review_data = db.execute(
+        "SELECT AVG(rating) as average_rating, COUNT(*) as review_count FROM reviews WHERE game_id = ?;",
+        game_id,
+    )[0]
+    recent_reviews = db.execute(
+        "SELECT reviews.*, users.username FROM reviews JOIN users ON reviews.user_id = users.id WHERE game_id = ? ORDER BY timestamp DESC LIMIT 5;",
+        game_id,
+    )
+    return render_template('game.html', game=game, aggregate_review_data=aggregate_review_data, recent_reviews=recent_reviews)
+
+
+@app.route("/login/", methods=["GET", "POST"])
 def login():
     """Log user in"""
     # Referred to Problem Set 9 (CS50 Finance) for login logic
@@ -66,7 +122,7 @@ def login():
         return render_template("login.html")
 
 
-@app.route("/logout")
+@app.route("/logout/")
 def logout():
     """Log user out"""
     # Referred to Problem Set 9 (CS50 Finance) for logout logic
@@ -78,7 +134,7 @@ def logout():
     return redirect("/")
 
 
-@app.route("/register", methods=["GET", "POST"])
+@app.route("/register/", methods=["GET", "POST"])
 def register():
     """Register user"""
     # Referred to Problem Set 9 (CS50 Finance) for register logic

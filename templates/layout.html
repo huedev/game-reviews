@@ -10,11 +10,27 @@
 <body class="font-sans mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
     <header>
         <nav class="py-3 flex justify-between">
-            <div class="flex items-center">
-                <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">CS50 Game Reviews</h1>
-            </div>
+            <a href="/" class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="text-indigo-600 mr-1" viewBox="0 0 16 16">
+                    <path d="M10 2a2 2 0 0 1-1.5 1.937v5.087c.863.083 1.5.377 1.5.726 0 .414-.895.75-2 .75s-2-.336-2-.75c0-.35.637-.643 1.5-.726V3.937A2 2 0 1 1 10 2z"/>
+                    <path d="M0 9.665v1.717a1 1 0 0 0 .553.894l6.553 3.277a2 2 0 0 0 1.788 0l6.553-3.277a1 1 0 0 0 .553-.894V9.665c0-.1-.06-.19-.152-.23L9.5 6.715v.993l5.227 2.178a.125.125 0 0 1 .001.23l-5.94 2.546a2 2 0 0 1-1.576 0l-5.94-2.546a.125.125 0 0 1 .001-.23L6.5 7.708l-.013-.988L.152 9.435a.25.25 0 0 0-.152.23z"/>
+                  </svg>
+                <div class="text-xl font-bold leading-7 text-gray-900 sm:truncate sm:text-2xl sm:tracking-tight">
+                    CS50 Game Reviews
+                </div>
+            </a>
             <ul class="flex items-center space-x-4">
                 {% if session["user_id"] %}
+                    <form action="/search" method="post">
+                        <div class="relative hidden md:block">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-gray-500">
+                                    <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <input autocomplete="off" class="block w-full rounded-md border-0 py-1.5 pl-8 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" id="search" name="search" placeholder="Search" value="{{ search }}" type="text">
+                        </div>
+                    </form>
                     <li class="font-medium text-gray-700 hover:text-gray-900">
                         <a href="/logout">Log Out</a>
                     </li>
@@ -37,5 +53,6 @@
             Powered by <a href="https://www.igdb.com/" target="_blank" class="text-gray-900">IGDB</a>
         </div>
     </footer>
+    {% block script %}{% endblock %}
 </body>
 </html>
