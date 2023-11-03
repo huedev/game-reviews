@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}Reviews - {{ user.username }}{% endblock %}
+
+{% block main %}
+    <div class="flex flex-col space-y-4 sm:space-y-8 mt-10">
+        <h1 class="text-3xl font-bold leading-7 text-gray-900 sm:truncate sm:text-4xl sm:tracking-tight">{{ user.username }}</h1>
+        <div>
+            <h2 class="font-medium leading-7 text-gray-700 sm:truncate sm:text-xl sm:tracking-tight">All Reviews</h2>
+            <div class="space-y-6">
+                {% for review in reviews %}
+                    {% for game in games %}
+                        {% if game.id == review.game_id %}
+                            <div>
+                                <h3 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                                    <a href="/games/{{ review.game_id }}">{{ game.name }}</a>
+                                </h3>
+                                <div class="mt-2 flex items-start">
+                                    <a href="/games/{{ review.game_id }}" class="min-w-max w-32">
+                                        {% if 'cover' in game %}
+                                            <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/{{ game['cover']['image_id'] }}.png" alt="" class="rounded-md w-32">
+                                        {% else %}
+                                            <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/nocover.png" alt="" class="rounded-md w-24">
+                                        {% endif %}
+                                    </a>
+                                    <div class="ml-4">
+                                        <p class="text-gray-900">
+                                            {% if review.rating %}
+                                                {{ review.rating }}/10
+                                            {% else %}
+                                                Unrated
+                                            {% endif %}
+                                        </p>
+                                        <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ review.review }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+                {% if not reviews %}
+                    <p class="text-sm text-gray-700">This user has not written any reviews.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

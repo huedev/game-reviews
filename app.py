@@ -48,10 +48,10 @@ def search(search):
     return render_template('search.html', search=search, games=games)
 
 
-@app.route('/game/<game_id>', methods=["GET", "POST"])
+@app.route('/games/<game_id>', methods=["GET", "POST"])
 @login_required
 def game_details(game_id):
-    """Game details page"""
+    """View detailed information about a specific game"""
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
         # Ensure game_id was submitted
@@ -71,7 +71,12 @@ def game_details(game_id):
             request.form.get("review"),
         )
 
-    game = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'fields *, cover.image_id, platforms.name, genres.name; where id = {game_id}; limit 1;')[0]
+    game = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'fields *, cover.image_id, platforms.name, genres.name; where id = {game_id}; limit 1;')
+    if game:
+        game = game[0]
+    else:
+        return redirect("/")
+
     aggregate_review_data = db.execute(
         "SELECT AVG(rating) as average_rating, COUNT(*) as review_count FROM reviews WHERE game_id = ?;",
         game_id,
@@ -81,6 +86,50 @@ def game_details(game_id):
         game_id,
     )
     return render_template('game.html', game=game, aggregate_review_data=aggregate_review_data, recent_reviews=recent_reviews)
+
+
+@app.route('/reviews/<game_id>')
+@login_required
+def game_reviews(game_id):
+    """View user reviews for a specific game"""
+    game = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'fields *, cover.image_id, platforms.name, genres.name; where id = {game_id}; limit 1;')
+    if game:
+        game = game[0]
+    else:
+        return redirect("/")
+    
+    reviews = db.execute(
+        "SELECT reviews.*, users.username FROM reviews JOIN users ON reviews.user_id = users.id WHERE game_id = ? ORDER BY timestamp;",
+        game_id,
+    )
+    return render_template('game_reviews.html', game=game, reviews=reviews)
+
+
+@app.route('/users/<username>')
+@login_required
+def user_profile(username):
+    """View reviews from a specific user"""
+    user = db.execute(
+        "SELECT * FROM users WHERE username = ?;",
+        username,
+    )
+    if user:
+        user = user[0]
+    else:
+        return redirect("/")
+
+    reviews = db.execute(
+        "SELECT reviews.*, users.username FROM reviews JOIN users ON reviews.user_id = users.id WHERE user_id = ? ORDER BY timestamp;",
+        user['id'],
+    )
+    games_list = []
+    for review in reviews:
+        games_list.append(review['game_id'])
+    games_list_str = ','.join([str(game_id) for game_id in games_list])
+    print(games_list_str)
+    games = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'fields name, cover.image_id; where id = ({games_list_str});')
+    
+    return render_template('user.html', user=user, games_list=games_list, games=games, reviews=reviews)
 
 
 @app.route("/login/", methods=["GET", "POST"])
@@ -115,6 +164,7 @@ def login():
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
+        session["username"] = rows[0]["username"]
 
         # Redirect user to home page
         return redirect("/")

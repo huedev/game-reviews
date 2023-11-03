@@ -32,6 +32,9 @@
                         </div>
                     </form>
                     <li class="font-medium text-gray-700 hover:text-gray-900">
+                        <a href="/users/{{ session['username'] }}">Profile</a>
+                    </li>
+                    <li class="font-medium text-gray-700 hover:text-gray-900">
                         <a href="/logout">Log Out</a>
                     </li>
                 {% else %}

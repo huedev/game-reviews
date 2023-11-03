@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block title %}Reviews - {{ game.name }}{% endblock %}
+
+{% block main %}
+    <div class="flex flex-col space-y-4 sm:space-y-8 mt-10">
+        <div class="flex items-end">
+            <a href="/games/{{ game.id }}">
+                {% if 'cover' in game %}
+                    <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/{{ game['cover']['image_id'] }}.png" alt="" class="rounded-md w-24">
+                {% else %}
+                    <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/nocover.png" alt="" class="rounded-md w-24">
+                {% endif %}
+            </a>
+            <h1 class="ml-4 text-3xl font-bold leading-7 text-gray-900 sm:truncate sm:text-4xl sm:tracking-tight">
+                <a href="/games/{{ game.id }}">{{ game.name }}</a>
+            </h1>
+        </div>
+        <div>
+            <h2 class="font-medium leading-7 text-gray-700 sm:truncate sm:text-xl sm:tracking-tight">All Reviews</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for review in reviews %}
+                    <div>
+                        <a href="/users/{{ review.username }}" class="text-indigo-600 hover:text-indigo-500 font-medium">{{ review.username }}</a>
+                        <p class="text-gray-900">
+                            {% if review.rating %}
+                                {{ review.rating }}/10
+                            {% else %}
+                                Unrated
+                            {% endif %}
+                        </p>
+                        <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ review.review }}</p>
+                    </div>
+                {% endfor %}
+                {% if not reviews %}
+                    <p class="text-sm text-gray-700">There are no reviews for this game.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
