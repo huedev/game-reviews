@@ -49,9 +49,23 @@
         </nav>
     </header>
     <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="px-4 py-3 w-full text-sm rounded-lg
+                        {% if category == 'error' %}bg-rose-100 text-rose-700
+                        {% elif category == 'success' %}bg-emerald-100 text-emerald-700
+                        {% endif %}">
+                            {{ message }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
         {% block main %}{% endblock %}
     </main>
-    <footer class="py-3 flex items-center">
+    <footer class="py-4 mt-8 flex items-center border-t border-gray-200">
         <div class="text-sm text-gray-500">
             Powered by <a href="https://www.igdb.com/" target="_blank" class="text-gray-900">IGDB</a>
         </div>

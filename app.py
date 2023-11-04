@@ -1,6 +1,7 @@
 from cs50 import SQL
-from flask import Flask, redirect, render_template, request, session
+from flask import Flask, redirect, render_template, request, session, flash
 from flask_session import Session
+from jinja2 import Environment
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from helpers import login_required, igdb_authenticate, igdb_query
@@ -20,11 +21,21 @@ Session(app)
 db = SQL("sqlite:///game-reviews.db")
 
 
+
 @app.route('/')
 @login_required
 def index():
-    games = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', 'fields name, cover.image_id; where rating > 90; limit 6;')
-    return render_template('index.html', games=games)
+    recent_reviews = db.execute(
+        "SELECT reviews.*, users.username FROM reviews JOIN users ON reviews.user_id = users.id ORDER BY timestamp DESC;",
+    )
+    games_list = []
+    for review in recent_reviews:
+        games_list.append(review['game_id'])
+    games_list_str = ','.join([str(game_id) for game_id in games_list])
+    print(games_list_str)
+    games = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'fields name, cover.image_id; where id = ({games_list_str});')
+    
+    return render_template('index.html', games=games, recent_reviews=recent_reviews)
 
 
 @app.route('/search/', methods=["GET", "POST"])
@@ -54,22 +65,27 @@ def game_details(game_id):
     """View detailed information about a specific game"""
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
+        error = False
         # Ensure game_id was submitted
         if not request.form.get("game_id"):
-            return False
+            flash("Game ID required", "error")
+            error = True
         
         # Ensure review was submitted
         elif not request.form.get("review"):
-            return False
+            flash("Review content required", "error")
+            error = True
         
         # Submit review
-        db.execute(
-            "INSERT INTO reviews (user_id, game_id, rating, review) values(?, ?, ?, ?)",
-            session["user_id"],
-            request.form.get("game_id"),
-            request.form.get("rating"),
-            request.form.get("review"),
-        )
+        if not error:
+            db.execute(
+                "INSERT INTO reviews (user_id, game_id, rating, review) values(?, ?, ?, ?)",
+                session["user_id"],
+                request.form.get("game_id"),
+                request.form.get("rating"),
+                request.form.get("review"),
+            )
+            flash("Review published successfully", "success")
 
     game = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'fields *, cover.image_id, platforms.name, genres.name; where id = {game_id}; limit 1;')
     if game:
@@ -99,7 +115,7 @@ def game_reviews(game_id):
         return redirect("/")
     
     reviews = db.execute(
-        "SELECT reviews.*, users.username FROM reviews JOIN users ON reviews.user_id = users.id WHERE game_id = ? ORDER BY timestamp;",
+        "SELECT reviews.*, users.username FROM reviews JOIN users ON reviews.user_id = users.id WHERE game_id = ? ORDER BY timestamp DESC;",
         game_id,
     )
     return render_template('game_reviews.html', game=game, reviews=reviews)
@@ -119,7 +135,7 @@ def user_profile(username):
         return redirect("/")
 
     reviews = db.execute(
-        "SELECT reviews.*, users.username FROM reviews JOIN users ON reviews.user_id = users.id WHERE user_id = ? ORDER BY timestamp;",
+        "SELECT reviews.*, users.username FROM reviews JOIN users ON reviews.user_id = users.id WHERE user_id = ? ORDER BY timestamp DESC;",
         user['id'],
     )
     games_list = []
@@ -129,7 +145,7 @@ def user_profile(username):
     print(games_list_str)
     games = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'fields name, cover.image_id; where id = ({games_list_str});')
     
-    return render_template('user.html', user=user, games_list=games_list, games=games, reviews=reviews)
+    return render_template('user.html', user=user, games=games, reviews=reviews)
 
 
 @app.route("/login/", methods=["GET", "POST"])
@@ -144,11 +160,13 @@ def login():
     if request.method == "POST":
         # Ensure username was submitted
         if not request.form.get("username"):
-            return False
+            flash("Username required", "error")
+            return render_template("login.html")
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return False
+            flash("Password required", "error")
+            return render_template("login.html")
 
         # Query database for username
         rows = db.execute(
@@ -160,7 +178,8 @@ def login():
         if len(rows) != 1 or not check_password_hash(
             rows[0]["hash"], request.form.get("password")
         ):
-            return False
+            flash("Incorrect username or password", "error")
+            return render_template("login.html")
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
@@ -193,19 +212,23 @@ def register():
     if request.method == "POST":
         # Ensure username was submitted
         if not request.form.get("username"):
-            return False
+            flash("Username required", "error")
+            return render_template("register.html")
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return False
+            flash("Password required", "error")
+            return render_template("register.html")
 
         # Ensure confirmation was submitted
         elif not request.form.get("confirmation"):
-            return False
+            flash("Confirm password required", "error")
+            return render_template("register.html")
 
         # Ensure password and confirmation match
         elif not request.form.get("password") == request.form.get("confirmation"):
-            return False
+            flash("Passwords do not match", "error")
+            return render_template("register.html")
 
         # Ensure username does not already exist
         matching_users = db.execute(
@@ -213,7 +236,8 @@ def register():
             request.form.get("username"),
         )
         if not len(matching_users) == 0:
-            return False
+            flash("Username already taken", "error")
+            return render_template("register.html")
 
         # Insert user record into database
         rows = db.execute(
