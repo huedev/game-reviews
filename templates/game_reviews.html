@@ -37,6 +37,7 @@
                             {% endif %}
                         </p>
                         <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ review.review }}</p>
+                        <a href="/users/{{ review.username }}/review/{{ review.id }}" class="text-sm text-indigo-600 hover:text-indigo-500 font-medium">See review details</a>
                     </div>
                 {% endfor %}
                 {% if not reviews %}

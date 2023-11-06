@@ -1,7 +1,7 @@
+from datetime import datetime
 from cs50 import SQL
 from flask import Flask, redirect, render_template, request, session, flash
 from flask_session import Session
-from jinja2 import Environment
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from helpers import login_required, igdb_authenticate, igdb_query
@@ -20,6 +20,11 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///game-reviews.db")
 
+
+@app.template_filter('datetime_format')
+def datetime_format(value, format="%b %d, %Y"):
+    date = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+    return date.strftime(format)
 
 
 @app.route('/')
@@ -79,7 +84,7 @@ def game_details(game_id):
         # Submit review
         if not error:
             db.execute(
-                "INSERT INTO reviews (user_id, game_id, rating, review) values(?, ?, ?, ?)",
+                "INSERT INTO reviews (user_id, game_id, rating, review) values(?, ?, ?, ?);",
                 session["user_id"],
                 request.form.get("game_id"),
                 request.form.get("rating"),
@@ -142,10 +147,77 @@ def user_profile(username):
     for review in reviews:
         games_list.append(review['game_id'])
     games_list_str = ','.join([str(game_id) for game_id in games_list])
-    print(games_list_str)
     games = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'fields name, cover.image_id; where id = ({games_list_str});')
     
     return render_template('user.html', user=user, games=games, reviews=reviews)
+
+
+@app.route('/users/<username>/review/<review_id>', methods=["GET", "POST"])
+@login_required
+def user_review(username, review_id):
+    """View full review details of a specific review"""
+    user = db.execute(
+        "SELECT * FROM users WHERE username = ?;",
+        username,
+    )
+    if user:
+        user = user[0]
+    else:
+        return redirect("/")
+
+    review = db.execute(
+        "SELECT reviews.*, users.username FROM reviews JOIN users ON reviews.user_id = users.id WHERE reviews.id = ?;",
+        review_id,
+    )
+    if review:
+        review = review[0]
+    else:
+        return redirect("/")
+    
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        error = False
+        # Ensure game_id was submitted
+        if not request.form.get("review_id"):
+            flash("Review ID required", "error")
+            error = True
+        
+        # Ensure review was submitted
+        elif not request.form.get("review"):
+            flash("Review content required", "error")
+            error = True
+        
+        # Ensure that the user wrote this review
+        elif not session["user_id"] == review["user_id"]:
+            flash("Permission denied", "error")
+            error = True
+        
+        # Update review
+        if not error:
+            db.execute(
+                "UPDATE reviews SET rating = ?, review = ? WHERE id = ?;",
+                request.form.get("rating"),
+                request.form.get("review"),
+                request.form.get("review_id"),
+            )
+            flash("Review updated successfully", "success")
+
+            # Get the updated review data
+            review = db.execute(
+                "SELECT reviews.*, users.username FROM reviews JOIN users ON reviews.user_id = users.id WHERE reviews.id = ?;",
+                review_id,
+            )
+            if review:
+                review = review[0]
+            else:
+                return redirect("/")
+    game = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'fields name, cover.image_id; where id = {review['game_id']};')
+    if game:
+        game = game[0]
+    else:
+        return redirect("/")
+    
+    return render_template('review.html', user=user, game=game, review=review)
 
 
 @app.route("/login/", methods=["GET", "POST"])

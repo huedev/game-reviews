@@ -7,14 +7,18 @@ const dialogBackdrop = document.querySelector("#modal-backdrop");
 const dialogPanel = document.querySelector("#modal-panel");
 
 // Review button opens the dialog modally
-showButton.addEventListener("click", () => {
-    showDialog();
-});
+if (showButton) {
+    showButton.addEventListener("click", () => {
+        showDialog();
+    });
+}
 
 // Cancel button closes the dialog
-closeButton.addEventListener("click", () => {
-    hideDialog();
-});
+if (closeButton) {
+    closeButton.addEventListener("click", () => {
+        hideDialog();
+    });
+}
 
 function showDialog() {
     dialog.showModal();
