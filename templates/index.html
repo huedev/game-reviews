@@ -5,6 +5,42 @@
 {% block main %}
     <div class="flex flex-col space-y-4 sm:space-y-8 mt-10">
         <div>
+            <h2 class="font-medium leading-7 text-gray-700 dark:text-gray-300 sm:truncate sm:text-xl sm:tracking-tight">Highest Rated</h2>
+            <div class="space-y-6">
+                <ul role="list" class="mt-2 grid grid-cols-3 gap-x-4 gap-y-4 sm:grid-cols-6 sm:gap-x-4">
+                    {% for highest_rated_game in highest_rated_games %}
+                        {% for game in games %}
+                            {% if game.id == highest_rated_game.game_id %}
+                                <li class="relative flex flex-col">
+                                    <a href="/games/{{ game.id }}" class="group flex justify-center items-center w-full overflow-hidden rounded-md focus-within:ring-2 focus-within:ring-indigo-600 dark:focus-within:ring-indigo-500">
+                                        {% if 'cover' in game %}
+                                            <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/{{ game['cover']['image_id'] }}.jpg" alt="" class="transition ease-in-out object-cover group-hover:brightness-25 duration-300">
+                                        {% else %}
+                                            <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/nocover.jpg" alt="" class="object-cover group-hover:brightness-25">
+                                        {% endif %}
+                                        <p class="transition ease-in-out absolute text-center justify-center items-center top-0 bottom-11 z-10 w-11/12 pointer-events-none mt-2 flex text-sm font-medium text-white opacity-0 group-hover:opacity-100 duration-300">{{ game.name }}</p>
+                                    </a>
+                                    <p class="mt-1 text-center justify-center text-gray-900 dark:text-gray-100">
+                                        {% if highest_rated_game.average_rating %}
+                                            {{ highest_rated_game.average_rating }}/10
+                                        {% else %}
+                                            Unrated
+                                        {% endif %}
+                                    </p>
+                                    <p class="text-sm text-center justify-center text-gray-700 dark:text-gray-300">
+                                        {{ highest_rated_game.review_count }} Review{% if highest_rated_game.review_count != 1 %}s{% endif %}
+                                    </p>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+                {% if not highest_rated_games %}
+                    <p class="text-sm text-gray-700 dark:text-gray-300">There are no reviews available.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div>
             <h2 class="font-medium leading-7 text-gray-700 dark:text-gray-300 sm:truncate sm:text-xl sm:tracking-tight">Recent Reviews</h2>
             <div class="space-y-6">
                 {% for review in recent_reviews %}

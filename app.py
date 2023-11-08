@@ -31,18 +31,24 @@ def datetime_format(value, format="%b %d, %Y"):
 @app.route('/')
 @login_required
 def index():
+    highest_rated_games = db.execute(
+        "SELECT game_id, AVG(rating) as average_rating, COUNT(*) as review_count FROM reviews GROUP BY game_id ORDER BY average_rating DESC, review_count DESC LIMIT 6;"
+    )
+
     recent_reviews = db.execute(
-        "SELECT reviews.*, users.username FROM reviews JOIN users ON reviews.user_id = users.id ORDER BY timestamp DESC;",
+        "SELECT reviews.*, users.username FROM reviews JOIN users ON reviews.user_id = users.id ORDER BY timestamp DESC LIMIT 5;",
     )
 
     games_list = []
     for review in recent_reviews:
         games_list.append(review['game_id'])
+    for game in highest_rated_games:
+        games_list.append(game['game_id'])
     games_list_str = ','.join([str(game_id) for game_id in games_list])
 
     games = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'fields name, cover.image_id; where id = ({games_list_str});')
     
-    return render_template('index.html', games=games, recent_reviews=recent_reviews)
+    return render_template('index.html', games=games, highest_rated_games=highest_rated_games, recent_reviews=recent_reviews)
 
 
 @app.route('/search/', methods=["GET", "POST"])
