@@ -21,6 +21,7 @@ Session(app)
 db = SQL("sqlite:///game-reviews.db")
 
 
+# Referred to Flask documentation (https://flask.palletsprojects.com/en/3.0.x/templating/#registering-filters) for registering template filters
 @app.template_filter('datetime_format')
 def datetime_format(value, format="%b %d, %Y"):
     date = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
@@ -33,11 +34,12 @@ def index():
     recent_reviews = db.execute(
         "SELECT reviews.*, users.username FROM reviews JOIN users ON reviews.user_id = users.id ORDER BY timestamp DESC;",
     )
+
     games_list = []
     for review in recent_reviews:
         games_list.append(review['game_id'])
     games_list_str = ','.join([str(game_id) for game_id in games_list])
-    print(games_list_str)
+
     games = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'fields name, cover.image_id; where id = ({games_list_str});')
     
     return render_template('index.html', games=games, recent_reviews=recent_reviews)
@@ -48,11 +50,9 @@ def index():
 def search_redirect():
     """Redirect to search results"""
     if request.method == "POST":
-        print("Go to search!")
         search = request.form.get("search")
         return redirect(f"/search/{search}")
     else:
-        print("Go to home!")
         return redirect("/")
 
 
@@ -143,10 +143,12 @@ def user_profile(username):
         "SELECT reviews.*, users.username FROM reviews JOIN users ON reviews.user_id = users.id WHERE user_id = ? ORDER BY timestamp DESC;",
         user['id'],
     )
+
     games_list = []
     for review in reviews:
         games_list.append(review['game_id'])
     games_list_str = ','.join([str(game_id) for game_id in games_list])
+
     games = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'fields name, cover.image_id; where id = ({games_list_str});')
     
     return render_template('user.html', user=user, games=games, reviews=reviews)

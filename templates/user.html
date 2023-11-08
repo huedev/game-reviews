@@ -5,21 +5,21 @@
 {% block main %}
     <div class="flex flex-col space-y-4 sm:space-y-8 mt-10">
         <div class="flex flex-col items-start">
-            <h1 class="text-3xl font-bold leading-7 text-gray-900 sm:truncate sm:text-4xl sm:tracking-tight">{{ user.username }}</h1>
+            <h1 class="text-3xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-4xl sm:tracking-tight">{{ user.username }}</h1>
             <div>
-                <p class="text-gray-700">
-                    <span class="font-medium text-gray-900">{{ reviews|length }}</span> {{ name }} Review{% if reviews|length != 1 %}s{% endif %}
+                <p class="text-gray-700 dark:text-gray-300">
+                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ reviews|length }}</span> {{ name }} Review{% if reviews|length != 1 %}s{% endif %}
                 </p>
             </div>
         </div>
         <div>
-            <h2 class="font-medium leading-7 text-gray-700 sm:truncate sm:text-xl sm:tracking-tight">All Reviews</h2>
+            <h2 class="font-medium leading-7 text-gray-700 dark:text-gray-300 sm:truncate sm:text-xl sm:tracking-tight">All Reviews</h2>
             <div class="space-y-6">
                 {% for review in reviews %}
                     {% for game in games %}
                         {% if game.id == review.game_id %}
                             <div>
-                                <h3 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                                <h3 class="text-2xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-3xl sm:tracking-tight">
                                     <a href="/games/{{ review.game_id }}">{{ game.name }}</a>
                                 </h3>
                                 <div class="mt-2 flex items-start">
@@ -31,15 +31,15 @@
                                         {% endif %}
                                     </a>
                                     <div class="ml-4">
-                                        <p class="text-gray-900">
+                                        <p class="text-gray-900 dark:text-gray-100">
                                             {% if review.rating %}
                                                 {{ review.rating }}/10
                                             {% else %}
                                                 Unrated
                                             {% endif %}
                                         </p>
-                                        <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ review.review }}</p>
-                                        <a href="/users/{{ review.username }}/review/{{ review.id }}" class="text-sm text-indigo-600 hover:text-indigo-500 font-medium">See review details</a>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ review.review }}</p>
+                                        <a href="/users/{{ review.username }}/review/{{ review.id }}" class="text-sm text-indigo-600 dark:text-indigo-500 hover:text-indigo-500 dark:hover:text-indigo-600 font-medium">See review details</a>
                                     </div>
                                 </div>
                             </div>
@@ -47,7 +47,7 @@
                     {% endfor %}
                 {% endfor %}
                 {% if not reviews %}
-                    <p class="text-sm text-gray-700">This user has not written any reviews.</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300">This user has not written any reviews.</p>
                 {% endif %}
             </div>
         </div>
