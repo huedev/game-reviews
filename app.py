@@ -40,10 +40,10 @@ def index():
     )
 
     games_list = []
-    for review in recent_reviews:
-        games_list.append(review['game_id'])
     for game in highest_rated_games:
         games_list.append(game['game_id'])
+    for review in recent_reviews:
+        games_list.append(review['game_id'])
     games_list_str = ','.join([str(game_id) for game_id in games_list])
 
     games = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'fields name, cover.image_id; where id = ({games_list_str});')
