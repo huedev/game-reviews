@@ -62,17 +62,21 @@ def search_redirect():
     """Redirect to search results"""
     if request.method == "POST":
         search = request.form.get("search")
-        return redirect(f"/search/{search}")
+        return redirect(f"/search/{search}/0")
     else:
         return redirect("/")
 
 
-@app.route('/search/<search>', methods=["GET", "POST"])
+@app.route('/search/<search>/<page>', methods=["GET", "POST"])
 @login_required
-def search(search):
+def search(search, page):
     """Display search results"""
-    games = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'search "{search}"; fields name, cover.image_id; where category = 0; limit 18;')
-    return render_template('search.html', search=search, games=games)
+    page = int(page)
+    results_per_page = 18
+    offset = results_per_page * page
+    # Page normally shows 18 results, but get an extra game to check if the next page link should be shown
+    games = igdb_query(CLIENT_ID, ACCESS_TOKEN, 'games', f'search "{search}"; fields name, cover.image_id; where category = 0; limit {results_per_page + 1}; offset {offset};')
+    return render_template('search.html', search=search, page=page, games=games)
 
 
 @app.route('/games/<game_id>', methods=["GET", "POST"])

@@ -881,6 +881,10 @@ select {
   grid-template-columns: repeat(1, minmax(0, 1fr));
 }
 
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .grid-cols-3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -913,8 +917,16 @@ select {
   justify-content: space-between;
 }
 
+.gap-3 {
+  gap: 0.75rem;
+}
+
 .gap-6 {
   gap: 1.5rem;
+}
+
+.gap-4 {
+  gap: 1rem;
 }
 
 .gap-x-2 {
@@ -1502,6 +1514,10 @@ select {
 
   .sm\:grid-flow-row-dense {
     grid-auto-flow: row dense;
+  }
+
+  .sm\:grid-flow-col-dense {
+    grid-auto-flow: column dense;
   }
 
   .sm\:grid-cols-2 {
