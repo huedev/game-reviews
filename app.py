@@ -195,9 +195,14 @@ def user_review(username, review_id):
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
         error = False
-        # Ensure game_id was submitted
+        # Ensure review_id was submitted
         if not request.form.get("review_id"):
             flash("Review ID required", "error")
+            error = True
+        
+        # Ensure submitted review_id matches route
+        elif not request.form.get("review") == review_id:
+            flash("Invalid review ID", "error")
             error = True
         
         # Ensure review was submitted
