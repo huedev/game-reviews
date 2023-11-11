@@ -20,6 +20,10 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///game-reviews.db")
 
+# Define minimum and maximum rating bounds for server-side validation
+RATING_MINIMUM = 1
+RATING_MAXIMUM = 10
+
 
 # Referred to Flask documentation (https://flask.palletsprojects.com/en/3.0.x/templating/#registering-filters) for registering template filters
 @app.template_filter('datetime_format')
@@ -31,6 +35,7 @@ def datetime_format(value, format="%b %d, %Y"):
 @app.route('/')
 @login_required
 def index():
+    """View a list of highest rated games and recent reviews"""
     highest_rated_games = db.execute(
         "SELECT game_id, AVG(rating) as average_rating, COUNT(*) as review_count FROM reviews GROUP BY game_id ORDER BY average_rating DESC, review_count DESC LIMIT 6;"
     )
@@ -85,6 +90,11 @@ def game_details(game_id):
         # Ensure review was submitted
         elif not request.form.get("review"):
             flash("Review content required", "error")
+            error = True
+        
+        # Ensure that rating, if it was provided, is within expected bounds
+        elif request.form.get("rating", type=int) is not None and (request.form.get("rating", type=int) < RATING_MINIMUM or request.form.get("rating", type=int) > RATING_MAXIMUM):
+            flash("Invalid rating", "error")
             error = True
         
         # Submit review
@@ -198,6 +208,11 @@ def user_review(username, review_id):
         # Ensure that the user wrote this review
         elif not session["user_id"] == review["user_id"]:
             flash("Permission denied", "error")
+            error = True
+
+        # Ensure that rating, if it was provided, is within expected bounds
+        elif request.form.get("rating", type=int) is not None and (request.form.get("rating", type=int) < RATING_MINIMUM or request.form.get("rating", type=int) > RATING_MAXIMUM):
+            flash("Invalid rating", "error")
             error = True
         
         # Update review
