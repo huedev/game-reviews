@@ -205,7 +205,7 @@ def user_review(username, review_id):
             error = True
         
         # Ensure submitted review_id matches route
-        elif not request.form.get("review") == review_id:
+        elif not request.form.get("review_id") == review_id:
             flash("Invalid review ID", "error")
             error = True
         
