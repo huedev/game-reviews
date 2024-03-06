@@ -1,5 +1,7 @@
 # CS50 Game Reviews
 
+Video Demo: https://youtu.be/zWiiOrYNr0s
+
 ## About
 CS50 Game Reviews is a web application built using Python via the Flask framework, JavaScript for some interactive elements, SQLite for the database that stores users and their reviews, and the [Tailwind CSS](https://tailwindcss.com/) framework to style the application's front-end. It also uses the [IGDB](https://www.igdb.com/) [API](https://api-docs.igdb.com) in order to pull data such as cover art, genres, and platforms on most published video games.
 
